@@ -1,4 +1,4 @@
-package com.rara.my_selectshop;
+package com.rara.my_selectshop.entity;
 
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import jakarta.persistence.Column;

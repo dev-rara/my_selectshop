@@ -1,6 +1,6 @@
 package com.rara.my_selectshop.controller;
 
-import com.rara.my_selectshop.Product;
+import com.rara.my_selectshop.entity.Product;
 import com.rara.my_selectshop.dto.ProductMypriceRequestDto;
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import com.rara.my_selectshop.dto.ProductResponseDto;
