@@ -3,7 +3,7 @@
 ## 🛠️Tech Stack
 * HTML/CSS/JS
 * Spring Boot
-* JPA
+* Spring Data JPA
 * JWT
 * Thymeleaf
 * H2 Database
