@@ -3,11 +3,13 @@ package com.rara.my_selectshop.service.impl;
 import com.rara.my_selectshop.dto.ProductMypriceRequestDto;
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import com.rara.my_selectshop.dto.ProductResponseDto;
+import com.rara.my_selectshop.entity.Folder;
 import com.rara.my_selectshop.entity.Product;
 import com.rara.my_selectshop.entity.User;
 import com.rara.my_selectshop.entity.UserRoleEnum;
 import com.rara.my_selectshop.jwt.JwtUtil;
 import com.rara.my_selectshop.naver.dto.ItemDto;
+import com.rara.my_selectshop.repository.FolderRepository;
 import com.rara.my_selectshop.repository.ProductRepository;
 import com.rara.my_selectshop.repository.UserRepository;
 import com.rara.my_selectshop.service.ProductService;
@@ -30,6 +32,7 @@ public class ProductServiceImpl implements ProductService {
 	private final UserRepository userRepository;
 
 	private final JwtUtil jwtUtil;
+	private final FolderRepository folderRepository;
 
 	@Transactional
 	public ProductResponseDto createProduct(ProductRequestDto requestDto,
@@ -147,5 +150,47 @@ public class ProductServiceImpl implements ProductService {
 			() -> new NullPointerException("해당 상품은 존재하지 않습니다.")
 		);
 		product.updateByItemDto(itemDto);
+	}
+
+	@Transactional
+	@Override
+	public Product addFolder (Long productId, Long folderId, HttpServletRequest request) {
+		String token = jwtUtil.resolveToken(request);
+		Claims claims;
+
+		if(token != null) {
+			if(jwtUtil.validateToken(token)) {
+				claims = jwtUtil.getUserInfoFromToken(token);
+			} else {
+				throw new IllegalArgumentException("Token Error");
+			}
+
+			//사용자 정보로 DB 조회
+			User user= userRepository.findByUsername(claims.getSubject()).orElseThrow(
+				() -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+			);
+
+			//1. 상품을 조회
+			Product product = productRepository.findById(productId).orElseThrow(
+				() -> new NullPointerException("해당 상품 아이디가 존재하지 않습니다.")
+			);
+
+			//2. 관심상품을 조회
+			Folder folder = folderRepository.findById(folderId).orElseThrow(
+				() -> new NullPointerException("해당 폴더 아이디가 존재하지 않습니다.")
+			);
+
+			//3. 조회한 폴더와 관심상품이 모두 로그인한 회원의 소유인지 확인
+			Long loginUserId = user.getId();
+			if(!product.getUserId().equals(loginUserId) || !folder.getUser().getId().equals(loginUserId)) {
+				throw new IllegalArgumentException("회원님의 관심상품이 아니거나, 회원님의 폴더가 아닙니다.");
+			}
+
+			product.addFolder(folder);
+			return product;
+
+		} else {
+			return null;
+		}
 	}
 }

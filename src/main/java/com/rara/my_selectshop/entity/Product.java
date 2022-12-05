@@ -8,6 +8,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,6 +43,9 @@ public class Product extends TimeStamped {
 	@Column(nullable = false)
 	private Long userId;
 
+	@ManyToMany
+	private List<Folder> folderList = new ArrayList<>();
+
 	public Product(ProductRequestDto requestDto, Long userId) {
 		this.title = requestDto.getTitle();
 		this.image = requestDto.getImage();
@@ -55,5 +61,9 @@ public class Product extends TimeStamped {
 
 	public void updateByItemDto(ItemDto itemDto) {
 		this.lprice = itemDto.getLprice();
+	}
+
+	public void addFolder(Folder folder) {
+		this.folderList.add(folder);
 	}
 }

@@ -16,4 +16,6 @@ public interface ProductService {
 	Long updateProduct(Long id, ProductMypriceRequestDto requestDto, HttpServletRequest request);
 
 	void updateBySearch(Long id, ItemDto itemDto);
+
+	Product addFolder(Long productId, Long folderId, HttpServletRequest request);
 }

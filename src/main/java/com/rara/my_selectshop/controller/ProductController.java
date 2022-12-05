@@ -49,5 +49,11 @@ public class ProductController {
 		return productService.updateProduct(id, requestDto, request);
 	}
 
+	@PostMapping("/products/{productId}/folder")
+	public Long addFolder(@PathVariable Long productId, @RequestParam Long folderId, HttpServletRequest request) {
+		Product product = productService.addFolder(productId, folderId, request);
+		return product.getId();
+	}
+
 }
 
