@@ -56,11 +56,17 @@ public class FolderServiceImpl implements FolderService {
 				() -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
 			);
 
+			//입력받은 폴더명을 기준으로, 이미 생성한 폴더들을 조회
+			List<Folder> existFolderList = folderRepository.findAllByUserAndNameIn(user, folderNames);
+
 			List<Folder> folderList = new ArrayList<>();
 
 			for (String folderName : folderNames) {
-				Folder folder = new Folder(folderName, user);
-				folderList.add(folder);
+				// 이미 생성한 폴더가 아닌 경우만 폴더 생성
+				if (!isExistFolderName(folderName, existFolderList)) {
+					Folder folder = new Folder(folderName, user);
+					folderList.add(folder);
+				}
 			}
 
 			return folderRepository.saveAll(folderList);
@@ -130,6 +136,16 @@ public class FolderServiceImpl implements FolderService {
 		} else {
 			return null;
 		}
+	}
+
+	private boolean isExistFolderName(String folderName, List<Folder> existFolderList) {
+		// 기존 폴더 리스트에서 folder name 이 있는지?
+		for (Folder existFolder : existFolderList) {
+			if (existFolder.getName().equals(folderName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
