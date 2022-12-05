@@ -12,7 +12,7 @@ public class ShopController {
 	@GetMapping("/shop")
 	public ModelAndView shop() {
 		ModelAndView modelAndView = new ModelAndView("index");
-		modelAndView.addObject("useranem", "");
+		modelAndView.addObject("username", "");
 		return modelAndView;
 	}
 }
