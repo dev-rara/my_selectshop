@@ -28,7 +28,7 @@ public class User {
 	private String email;
 
 	@Column(nullable = false)
-	@Enumerated(value = EnumType.ORDINAL)
+	@Enumerated(value = EnumType.STRING)
 	private UserRoleEnum role;
 
 	public User(String username, String password, String email, UserRoleEnum role) {
