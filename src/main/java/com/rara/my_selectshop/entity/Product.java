@@ -1,5 +1,6 @@
 package com.rara.my_selectshop.entity;
 
+import com.rara.my_selectshop.dto.ProductMypriceRequestDto;
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,5 +42,9 @@ public class Product {
 		this.link = requestDto.getLink();
 		this.lprice = requestDto.getLprice();
 		this.myprice = 0;
+	}
+
+	public void update(ProductMypriceRequestDto requestDto) {
+		this.myprice = requestDto.getMyprice();
 	}
 }
