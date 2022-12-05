@@ -4,6 +4,7 @@ import com.rara.my_selectshop.dto.ProductMypriceRequestDto;
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import com.rara.my_selectshop.dto.ProductResponseDto;
 import com.rara.my_selectshop.entity.Product;
+import com.rara.my_selectshop.naver.dto.ItemDto;
 import com.rara.my_selectshop.repository.ProductRepository;
 import com.rara.my_selectshop.service.ProductService;
 import java.util.ArrayList;
@@ -43,4 +44,12 @@ public class ProductServiceImpl implements ProductService {
 		return product.getId();
 	}
 
+	@Override
+	@Transactional
+	public void updateBySearch(Long id, ItemDto itemDto) {
+		Product product = productRepository.findById(id).orElseThrow(
+			() -> new NullPointerException("해당 상품은 존재하지 않습니다.")
+		);
+		product.updateByItemDto(itemDto);
+	}
 }
