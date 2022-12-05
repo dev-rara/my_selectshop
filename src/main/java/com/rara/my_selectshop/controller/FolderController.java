@@ -1,7 +1,15 @@
 package com.rara.my_selectshop.controller;
 
-import org.springframework.stereotype.Controller;
+import com.rara.my_selectshop.dto.FolderRequestDto;
+import com.rara.my_selectshop.entity.Folder;
+import com.rara.my_selectshop.service.FolderService;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
