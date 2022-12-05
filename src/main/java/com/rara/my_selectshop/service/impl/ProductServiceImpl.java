@@ -15,6 +15,8 @@ import com.rara.my_selectshop.repository.UserRepository;
 import com.rara.my_selectshop.service.ProductService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -184,6 +186,11 @@ public class ProductServiceImpl implements ProductService {
 			Long loginUserId = user.getId();
 			if(!product.getUserId().equals(loginUserId) || !folder.getUser().getId().equals(loginUserId)) {
 				throw new IllegalArgumentException("회원님의 관심상품이 아니거나, 회원님의 폴더가 아닙니다.");
+			}
+
+			Optional<Product> overlapFolder = productRepository.findByIdAndFolderList_Id(product.getId(), folder.getId());
+			if(overlapFolder.isPresent()) {
+				throw new IllegalArgumentException("해당 폴더에 동일 상품이 존재합니다.");
 			}
 
 			product.addFolder(folder);
