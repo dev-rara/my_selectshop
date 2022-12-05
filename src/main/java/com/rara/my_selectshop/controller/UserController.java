@@ -33,4 +33,9 @@ public class UserController {
 		return "redirect:/api/user/login";
 	}
 
+	@PostMapping("/login")
+	public String login(LoginRequestDto loginRequestDto) {
+		userService.login(loginRequestDto);
+		return "redirect:/api/shop";
+	}
 }
