@@ -7,13 +7,17 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@Entity(name = "users")
 @NoArgsConstructor
+@Entity(name = "users")
 public class User {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -31,10 +35,14 @@ public class User {
 	@Enumerated(value = EnumType.STRING)
 	private UserRoleEnum role;
 
+	@OneToMany
+	List<Folder> folders = new ArrayList<>();
+
 	public User(String username, String password, String email, UserRoleEnum role) {
 		this.username = username;
 		this.password = password;
 		this.email = email;
 		this.role = role;
 	}
+
 }
