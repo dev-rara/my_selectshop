@@ -4,6 +4,7 @@ import com.rara.my_selectshop.dto.ProductMypriceRequestDto;
 import com.rara.my_selectshop.dto.ProductRequestDto;
 import com.rara.my_selectshop.dto.ProductResponseDto;
 import com.rara.my_selectshop.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,20 +24,20 @@ public class ProductController {
 
 	// 관심 상품 등록하기
 	@PostMapping("/products")
-	public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto) {
-		return productService.createProduct(requestDto);
+	public ProductResponseDto createProduct(@RequestBody ProductRequestDto requestDto, HttpServletRequest request) {
+		return productService.createProduct(requestDto, request);
 	}
 
 	// 관심 상품 조회하기
 	@GetMapping("/products")
-	public List<ProductResponseDto> getProducts() {
-		return productService.getProducts();
+	public List<ProductResponseDto> getProducts(HttpServletRequest request) {
+		return productService.getProducts(request);
 	}
 
 	// 관심 상품 최저가 등록하기
 	@PutMapping("/products/{id}")
-	public Long updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto) {
-		return productService.updateProduct(id, requestDto);
+	public Long updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto, HttpServletRequest request) {
+		return productService.updateProduct(id, requestDto, request);
 	}
 
 }

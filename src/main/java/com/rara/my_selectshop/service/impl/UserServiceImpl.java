@@ -4,8 +4,10 @@ import com.rara.my_selectshop.dto.LoginRequestDto;
 import com.rara.my_selectshop.dto.SignupRequestDto;
 import com.rara.my_selectshop.entity.User;
 import com.rara.my_selectshop.entity.UserRoleEnum;
+import com.rara.my_selectshop.jwt.JwtUtil;
 import com.rara.my_selectshop.repository.UserRepository;
 import com.rara.my_selectshop.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+
+	private final JwtUtil jwtUtil;
 	private static final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
 
 	@Override
@@ -46,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public void login(LoginRequestDto loginRequestDto) {
+	public void login(LoginRequestDto loginRequestDto, HttpServletResponse response) {
 		String username = loginRequestDto.getUsername();
 		String password = loginRequestDto.getPassword();
 
@@ -59,6 +63,9 @@ public class UserServiceImpl implements UserService {
 		if(!user.getPassword().equals(password)) {
 			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 		}
+
+		response.addHeader(
+			JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRole()));
 	}
 
 }

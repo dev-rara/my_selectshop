@@ -3,11 +3,14 @@ package com.rara.my_selectshop.controller;
 import com.rara.my_selectshop.dto.LoginRequestDto;
 import com.rara.my_selectshop.dto.SignupRequestDto;
 import com.rara.my_selectshop.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -33,9 +36,10 @@ public class UserController {
 		return "redirect:/api/user/login";
 	}
 
+	@ResponseBody
 	@PostMapping("/login")
-	public String login(LoginRequestDto loginRequestDto) {
-		userService.login(loginRequestDto);
-		return "redirect:/api/shop";
+	public String login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
+		userService.login(loginRequestDto, response);
+		return "success";
 	}
 }
