@@ -1,31 +1,8 @@
 let targetId;
-
+let host = 'http://' + window.location.host;
 $(document).ready(function () {
   // cookie 여부 확인하여 로그인 확인
   const auth = getToken();
-
-  // 처음 로딩 시 사용자 정보 가져오기 (이름 및 폴더)
-  if (auth !== '') {
-    $.ajax({
-      type: 'GET',
-      url: `/api/user-folder`,
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader("Authorization", auth);
-      },
-    }).done(function (fragment) {
-      // console.log(fragment);
-      $('#fragment').replaceWith(fragment);
-    });
-  }
-
-  if (auth !== '') {
-    $('#username').text('수강생');
-    $('#login-true').show();
-    $('#login-false').hide();
-  } else {
-    $('#login-false').show();
-    $('#login-true').hide();
-  }
 
   // id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
   $('#query').on('keypress', function (e) {
@@ -57,8 +34,59 @@ $(document).ready(function () {
   $('#see-area').show();
   $('#search-area').hide();
 
-  showProduct();
+  // 처음 로딩 시 사용자 정보 가져오기 (이름 및 폴더)
+  if (auth !== '') {
+    // 로그인한 유저 이름
+    $.ajax({
+      type: 'GET',
+      url: `/api/user-info`,
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("Authorization", auth);
+      },
+      success: function (response) {
+        if (response === 'fail') {
+          logout();
+          window.location.reload();
+        } else {
+          $('#username').text(response);
+        }
+      },
+      error(error, status, request) {
+        console.error(error);
+        logout();
+        window.location.href = host + "/api/user/login-page";
+      }
+    });
+
+    // 로그인한 유저의 폴더
+    $.ajax({
+      type: 'GET',
+      url: `/api/user-folder`,
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader("Authorization", auth);
+      },
+      error(error) {
+        console.error(error);
+        logout();
+        window.location.href = host + "/api/user/login-page";
+      }
+    }).done(function (fragment) {
+      // console.log(fragment);
+      $('#fragment').replaceWith(fragment);
+    });
+
+    $('#login-true').show();
+    $('#login-false').hide();
+
+    showProduct();
+  } else {
+    $('#login-false').show();
+    $('#login-true').hide();
+  }
+
 })
+
+
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -91,6 +119,11 @@ function execSearch() {
         let tempHtml = addHTML(itemDto);
         $('#search-result-box').append(tempHtml);
       }
+    },
+    error(error, status, request) {
+      console.error(error);
+      logout();
+      window.location.href = host + "/api/user/login-page";
     }
   })
 
@@ -114,8 +147,7 @@ function addHTML(itemDto) {
             </div>
         </div>
         <div class="search-itemDto-right">
-            <img src="../images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(
-      itemDto)})'>
+            <img src="../images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(itemDto)})'>
         </div>
     </div>`
 }
@@ -143,6 +175,16 @@ function addProduct(itemDto) {
       // 2. 응답 함수에서 modal을 뜨게 하고, targetId 를 reponse.id 로 설정
       $('#container').addClass('active');
       targetId = response.id;
+    },
+    error(error, status, request) {
+      console.log(error)
+      if(error.status === 403){
+        window.location.href = host + "/api/user/forbidden";
+      }else {
+        console.error(error);
+        logout();
+        window.location.href = host + "/api/user/login-page";
+      }
     }
   })
 }
@@ -183,13 +225,17 @@ function showProduct(folderId = null) {
     showPrevious: true,
     showNext: true,
     ajax: {
-      beforeSend: function (xhr) {
+      beforeSend: function(xhr) {
         xhr.setRequestHeader("Authorization", auth);
         $('#product-container').html('상품 불러오는 중...');
+      },
+      error(error, status, request) {
+        console.error(error);
+        logout();
+        window.location.href = host + "/api/user/login-page";
       }
     },
-    callback: function (data, pagination) {
-      console.log(data);
+    callback: function(data, pagination) {
       $('#product-container').empty();
       for (let i = 0; i < data.length; i++) {
         let product = data[i];
@@ -210,12 +256,10 @@ function openFolder(folderId) {
   }
   showProduct(folderId);
 }
-
 // 폴더 추가 팝업
 function openAddFolderPopup() {
   $('#container2').addClass('active');
 }
-
 // 폴더 Input 추가
 function addFolderInput() {
   $('#folders-input').append(
@@ -228,13 +272,11 @@ function addFolderInput() {
       `
   );
 }
-
 function closeFolderInput(folder) {
   $(folder).prev().remove();
   $(folder).next().remove();
   $(folder).remove();
 }
-
 function addFolder() {
   const auth = getToken();
   const folderNames = $('.folderToAdd').toArray().map(input => input.value);
@@ -245,11 +287,11 @@ function addFolder() {
         throw new Error("stop loop");
       }
     });
-  } catch (e) {
+  }catch (e) {
     console.log(e);
     return;
   }
-  console.log('folderNames', folderNames);
+
   $.ajax({
     type: "POST",
     url: `/api/folders`,
@@ -257,13 +299,18 @@ function addFolder() {
     data: JSON.stringify({
       folderNames
     }),
-    beforeSend: function (xhr) {
+    beforeSend: function(xhr) {
       xhr.setRequestHeader("Authorization", auth);
     },
     success: function (response) {
       $('#container2').removeClass('active');
       alert('성공적으로 등록되었습니다.');
       window.location.reload();
+    },
+    error(error, status, request) {
+      console.error(error);
+      logout();
+      window.location.href = host + "/api/user/login-page";
     }
   })
 }
@@ -289,8 +336,7 @@ function addProductItem(product) {
                         <div class="lprice">
                             <span>${numberWithCommas(product.lprice)}</span>원
                         </div>
-                        <div class="isgood ${product.lprice > product.myprice
-      ? 'none' : ''}">
+                        <div class="isgood ${product.lprice > product.myprice ? 'none' : ''}">
                             최저가
                         </div>
                     </div>
@@ -312,12 +358,11 @@ function addInputForProductToFolder(productId, button) {
   $.ajax({
     type: 'GET',
     url: `/api/folders`,
-    beforeSend: function (xhr) {
+    beforeSend: function(xhr) {
       xhr.setRequestHeader("Authorization", auth);
     },
     success: function (folders) {
-      const options = folders.map(
-          folder => `<option value="${folder.id}">${folder.name}</option>`)
+      const options = folders.map(folder => `<option value="${folder.id}">${folder.name}</option>`)
       const form = `
                 <span>
                     <form id="folder-select" method="post" autocomplete="off" action="/api/products/${productId}/folder">
@@ -330,20 +375,25 @@ function addInputForProductToFolder(productId, button) {
             `;
       $(form).insertBefore(button);
       $(button).remove();
-      $("#folder-select").on('submit', function (e) {
+      $("#folder-select").on('submit', function(e) {
         e.preventDefault();
         $.ajax({
           type: $(this).prop('method'),
-          url: $(this).prop('action'),
+          url : $(this).prop('action'),
           data: $(this).serialize(),
-          beforeSend: function (xhr) {
+          beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", auth);
           },
-        }).done(function () {
+        }).done(function() {
           alert('성공적으로 등록되었습니다.');
           window.location.reload();
         });
       });
+    },
+    error(error, status, request) {
+      console.error(error);
+      logout();
+      window.location.href = host + "/api/user/login-page";
     }
   });
 }
@@ -351,6 +401,7 @@ function addInputForProductToFolder(productId, button) {
 function addProductToFolder() {
 
 }
+
 
 function setMyprice() {
   /**
@@ -383,35 +434,49 @@ function setMyprice() {
       xhr.setRequestHeader("Authorization", auth);
     },
     success: function (response) {
+
+
+
       // 4. 모달을 종료한다. $('#container').removeClass('active');
       $('#container').removeClass('active');
       // 5. 성공적으로 등록되었음을 알리는 alert를 띄운다.
       alert('성공적으로 등록되었습니다.');
       // 6. 창을 새로고침한다. window.location.reload();
       window.location.reload();
+    },
+    error(error, status, request) {
+      console.error(error);
+      logout();
+      window.location.href = host + "/api/user/login-page";
     }
   })
 }
 
-function logout() {
+function logout(check) {
   // 토큰 값 ''으로 덮어쓰기
   document.cookie =
       'Authorization' + '=' + '' + ';path=/';
-  window.location.reload();
+  if(check) {
+    window.location.reload();
+  }
 }
 
-function getToken() {
+function  getToken() {
   let cName = 'Authorization' + '=';
   let cookieData = document.cookie;
   let cookie = cookieData.indexOf('Authorization');
   let auth = '';
-  if (cookie !== -1) {
+  if(cookie !== -1){
     cookie += cName.length;
     let end = cookieData.indexOf(';', cookie);
-    if (end === -1) {
-      end = cookieData.length;
-    }
+    if(end === -1)end = cookieData.length;
     auth = cookieData.substring(cookie, end);
   }
+
+  // kakao 로그인 사용한 경우 Bearer 추가
+  if(auth.indexOf('Bearer') === -1 && auth !== ''){
+    auth = 'Bearer ' + auth;
+  }
+
   return auth;
 }

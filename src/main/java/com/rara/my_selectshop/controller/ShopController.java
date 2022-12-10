@@ -1,12 +1,14 @@
 package com.rara.my_selectshop.controller;
 
+import com.rara.my_selectshop.security.UserDetailsImpl;
 import com.rara.my_selectshop.service.FolderService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -23,10 +25,17 @@ public class ShopController {
 
 	// 로그인 한 유저가 메인페이지를 요청할 때 가지고있는 폴더를 반환
 	@GetMapping("/user-folder")
-	public String getUserInfo(Model model, HttpServletRequest request) {
+	public String getUserInfo(Model model, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-		model.addAttribute("folders", folderService.getFolders(request));
+		model.addAttribute("folders", folderService.getFolders(userDetails.getUser()));
 
-		return "/index :: #fragment";
+		return "index :: #fragment";
+	}
+
+	// 로그인 한 유저가 메인페이지를 요청할 때 유저의 이름 반환
+	@GetMapping("/user-info")
+	@ResponseBody
+	public String getUserName(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		return userDetails.getUsername();
 	}
 }
